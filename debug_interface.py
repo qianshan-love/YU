@@ -396,9 +396,12 @@ HTML_TEMPLATE = """
 
         // 标签页切换
         function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(tab => {
-                if (tab.textContent.toLowerCase().includes(tabName)) {
+            document.querySelectorAll('.tab').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(function(tab) {
+                var tabText = tab.textContent.toLowerCase();
+                if (tabText.indexOf(tabName) >= 0) {
                     tab.classList.add('active');
                 }
             });
@@ -414,11 +417,11 @@ HTML_TEMPLATE = """
 
         // 更新Agent信息
         function updateAgentInfo() {
-            const agentType = document.getElementById('agentType').value;
-            const actionType = document.getElementById('actionType');
+            var agentType = document.getElementById('agentType').value;
+            var actionSelect = document.getElementById('actionType');
 
             // 根据Agent类型更新操作选项
-            const actions = {
+            var actions = {
                 'task_planner': ['generate_text', 'query_knowledge'],
                 'knowledge': ['query_knowledge', 'validate_content', 'search_web'],
                 'drafting': ['generate_text', 'validate_content'],
@@ -427,9 +430,11 @@ HTML_TEMPLATE = """
                 'member': ['query_knowledge']
             };
 
-            actionType.innerHTML = actions[agentType].map(action =>
-                `<option value="${action}">${action}</option>`
-            ).join('');
+            if (actions[agentType]) {
+                actionSelect.innerHTML = actions[agentType].map(function(action) {
+                    return '<option value="' + action + '">' + action + '</option>';
+                }).join('');
+            }
         }
 
         // 执行Agent任务
@@ -517,7 +522,7 @@ HTML_TEMPLATE = """
         }
 
         // 发送消息
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
 
@@ -527,8 +532,8 @@ HTML_TEMPLATE = """
             input.value = '';
 
             // 简单回复（实际应调用Agent）
-            setTimeout(() => {
-                addChatMessage('assistant', `收到消息: "${message}"，系统正在处理...`);
+            setTimeout(function() {
+                addChatMessage('assistant', '收到消息: "' + message + '"，系统正在处理...');
             }, 500);
         }
 
