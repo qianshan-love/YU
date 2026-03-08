@@ -392,7 +392,7 @@ HTML_TEMPLATE = """
 
     <script>
         // 状态管理
-        let messages = [];
+        var messages = [];
 
         // 标签页切换
         function switchTab(tabName) {
@@ -439,17 +439,17 @@ HTML_TEMPLATE = """
 
         // 执行Agent任务
         async function executeAgent() {
-            const agentType = document.getElementById('agentType').value;
-            const actionType = document.getElementById('actionType').value;
-            const paramsText = document.getElementById('paramsInput').value;
+            var agentType = document.getElementById('agentType').value;
+            var actionType = document.getElementById('actionType').value;
+            var paramsText = document.getElementById('paramsInput').value;
 
             try {
-                const params = paramsText ? JSON.parse(paramsText) : {};
+                var params = paramsText ? JSON.parse(paramsText) : {};
 
-                addLog(`执行Agent: ${agentType}, 操作: ${actionType}`, 'success');
-                addChatMessage('user', `执行 ${agentType}.${actionType}`);
+                addLog('执行Agent: ' + agentType + ', 操作: ' + actionType, 'success');
+                addChatMessage('user', '执行 ' + agentType + '.' + actionType);
 
-                const response = await fetch('/api/agent/execute', {
+                var response = await fetch('/api/agent/execute', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -460,27 +460,27 @@ HTML_TEMPLATE = """
                     })
                 });
 
-                const result = await response.json();
+                var result = await response.json();
 
                 if (result.success) {
-                    addLog(`执行成功: ${result.message}`, 'success');
+                    addLog('执行成功: ' + result.message, 'success');
                     displayResult(result);
                     addChatMessage('assistant', JSON.stringify(result.data, null, 2));
                 } else {
-                    addLog(`执行失败: ${result.message}`, 'error');
+                    addLog('执行失败: ' + result.message, 'error');
                     displayResult(result);
                 }
             } catch (error) {
-                addLog(`错误: ${error.message}`, 'error');
+                addLog('错误: ' + error.message, 'error');
                 displayResult({success: false, error: error.message});
             }
         }
 
         // 大模型对话
         async function chatWithLLM() {
-            const systemPrompt = document.getElementById('systemPrompt').value;
-            const userMessage = document.getElementById('userMessage').value;
-            const temperature = parseFloat(document.getElementById('temperature').value);
+            var systemPrompt = document.getElementById('systemPrompt').value;
+            var userMessage = document.getElementById('userMessage').value;
+            var temperature = parseFloat(document.getElementById('temperature').value);
 
             if (!userMessage.trim()) {
                 alert('请输入消息');
@@ -488,16 +488,16 @@ HTML_TEMPLATE = """
             }
 
             try {
-                addLog(`LLM对话: ${userMessage.substring(0, 50)}...`, 'success');
+                addLog('LLM对话: ' + userMessage.substring(0, 50) + '...', 'success');
                 addChatMessage('user', userMessage);
 
-                const messages = [];
+                var messages = [];
                 if (systemPrompt) {
                     messages.push({role: 'system', content: systemPrompt});
                 }
                 messages.push({role: 'user', content: userMessage});
 
-                const response = await fetch('/api/llm/chat', {
+                var response = await fetch('/api/llm/chat', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -506,25 +506,25 @@ HTML_TEMPLATE = """
                     })
                 });
 
-                const result = await response.json();
+                var result = await response.json();
 
                 if (result.success) {
-                    addLog(`LLM响应成功，长度: ${result.content.length}`, 'success');
+                    addLog('LLM响应成功，长度: ' + result.content.length, 'success');
                     addChatMessage('assistant', result.content);
                     displayResult(result);
                 } else {
-                    addLog(`LLM响应失败: ${result.error}`, 'error');
-                    addChatMessage('assistant', `错误: ${result.error}`);
+                    addLog('LLM响应失败: ' + result.error, 'error');
+                    addChatMessage('assistant', '错误: ' + result.error);
                 }
             } catch (error) {
-                addLog(`错误: ${error.message}`, 'error');
+                addLog('错误: ' + error.message, 'error');
             }
         }
 
         // 发送消息
         async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
+            var input = document.getElementById('chatInput');
+            var message = input.value.trim();
 
             if (!message) return;
 
@@ -539,22 +539,28 @@ HTML_TEMPLATE = """
 
         // 添加聊天消息
         function addChatMessage(role, content) {
-            const container = document.getElementById('chatContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${role}`;
-            messageDiv.innerHTML = content.replace(/\n/g, '<br>');
+            var container = document.getElementById('chatContainer');
+            var messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message ' + role;
+            // 替换换行符为<br>标签
+            var lines = content.split('\\n');
+            var contentWithBr = lines.join('<br>');
+            messageDiv.innerHTML = contentWithBr;
             container.appendChild(messageDiv);
             container.scrollTop = container.scrollHeight;
         }
 
         // 添加日志
-        function addLog(message, type = 'info') {
-            const container = document.getElementById('logContainer');
-            const logDiv = document.createElement('div');
-            logDiv.className = `log-entry ${type}`;
+        function addLog(message, type) {
+            if (typeof type === 'undefined') {
+                type = 'info';
+            }
+            var container = document.getElementById('logContainer');
+            var logDiv = document.createElement('div');
+            logDiv.className = 'log-entry ' + type;
 
-            const timestamp = new Date().toLocaleTimeString();
-            logDiv.innerHTML = `[${timestamp}] ${message}`;
+            var timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML = '[' + timestamp + '] ' + message;
 
             container.insertBefore(logDiv, container.firstChild);
 
@@ -566,8 +572,9 @@ HTML_TEMPLATE = """
 
         // 显示结果
         function displayResult(result) {
-            const area = document.getElementById('resultArea');
-            area.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(result, null, 2)}</pre>`;
+            var area = document.getElementById('resultArea');
+            var resultStr = JSON.stringify(result, null, 2);
+            area.innerHTML = '<pre style="white-space: pre-wrap; word-wrap: break-word;">' + resultStr + '</pre>';
         }
 
         // 清空对话
@@ -582,23 +589,23 @@ HTML_TEMPLATE = """
 
             try {
                 // 测试LLM
-                const llmResponse = await fetch('/api/llm/chat', {
+                var llmResponse = await fetch('/api/llm/chat', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         messages: [{role: 'user', content: '你好，请介绍一下自己'}]
                     })
                 });
-                const llmResult = await llmResponse.json();
+                var llmResult = await llmResponse.json();
 
                 if (llmResult.success) {
                     addLog('LLM测试成功', 'success');
                 } else {
-                    addLog(`LLM测试失败: ${llmResult.error}`, 'error');
+                    addLog(`LLM测试失败: ' + llmResult.error + '`, 'error');
                 }
 
                 // 测试Agent
-                const agentResponse = await fetch('/api/agent/execute', {
+                var agentResponse = await fetch('/api/agent/execute', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -608,12 +615,12 @@ HTML_TEMPLATE = """
                         context: {}
                     })
                 });
-                const agentResult = await agentResponse.json();
+                var agentResult = await agentResponse.json();
 
                 if (agentResult.success) {
                     addLog('Agent测试成功', 'success');
                 } else {
-                    addLog(`Agent测试失败: ${agentResult.message}`, 'error');
+                    addLog(`Agent测试失败: ' + agentResult.message + '`, 'error');
                 }
 
                 displayResult({
@@ -623,15 +630,15 @@ HTML_TEMPLATE = """
                 });
 
             } catch (error) {
-                addLog(`快速测试失败: ${error.message}`, 'error');
+                addLog(`快速测试失败: ' + error.message + '`, 'error');
             }
         }
 
         // 更新Agent列表
         function updateAgentList() {
-            const container = document.getElementById('agentList');
+            var container = document.getElementById('agentList');
 
-            const agents = [
+            var agents = [
                 {name: 'TaskPlanner', type: 'task_planner', status: 'ready'},
                 {name: 'KnowledgeAgent', type: 'knowledge', status: 'ready'},
                 {name: 'DraftingAgent', type: 'drafting', status: 'ready'},
@@ -642,8 +649,8 @@ HTML_TEMPLATE = """
 
             container.innerHTML = agents.map(agent => `
                 <div class="agent-card">
-                    <h3>${agent.name}</h3>
-                    <p>类型: ${agent.type}</p>
+                    <h3>' + agent.name + '</h3>
+                    <p>类型: ' + agent.type + '</p>
                     <p>状态: <span class="status-badge status-success">就绪</span></p>
                 </div>
             `).join('');
