@@ -820,3 +820,15 @@ class DispatcherAgent:
                 ErrorInfo(**e) for e in state_dict.get("errors", [])
             ]
         )
+
+
+# 全局调度器实例
+_dispatcher: Optional[DispatcherAgent] = None
+
+
+def get_dispatcher() -> DispatcherAgent:
+    """获取调度器单例"""
+    global _dispatcher
+    if _dispatcher is None:
+        _dispatcher = DispatcherAgent()
+    return _dispatcher
